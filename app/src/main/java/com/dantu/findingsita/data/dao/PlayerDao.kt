@@ -7,12 +7,13 @@ import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Update
 import com.dantu.findingsita.data.entities.Player
+import kotlinx.coroutines.flow.Flow
 
 @Dao
 interface PlayerDao {
 
     @Query("SELECT * FROM player")
-    fun getAllPlayers() : List<Player>
+    fun getAllPlayers() : Flow<List<Player>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun addPlayer(player: Player)

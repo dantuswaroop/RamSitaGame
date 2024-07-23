@@ -49,7 +49,6 @@ import androidx.navigation.compose.rememberNavController
             }
             Column(modifier = Modifier
                 .weight(.7f)
-                .background(Color.Green)
                 .fillMaxSize(),
                 verticalArrangement = Arrangement.Bottom,
                 horizontalAlignment = Alignment.CenterHorizontally) {

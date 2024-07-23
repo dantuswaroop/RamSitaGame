@@ -7,12 +7,16 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
@@ -28,9 +32,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.core.graphics.toColorInt
 import com.dantu.findingsita.data.DataBaseHelper
 import com.dantu.findingsita.data.entities.Player
 import kotlinx.coroutines.Dispatchers
@@ -41,12 +47,28 @@ import kotlinx.serialization.Serializable
 @Serializable
 object PlayerList
 
+val colors = listOf<Color>(Color(255, 170, 186),
+    Color(255, 223, 186),
+    Color(255, 225, 186),
+    Color(186, 225, 201),
+    Color(186, 225, 255),
+    Color(252,176,191),
+    Color(254,228,233),
+    Color(240,235,210),
+    Color(242,205,180),
+    Color(212,175,55),
+    Color(206,221,249),
+    Color(229,225,251),
+    Color(218,241,197),
+    Color(255,245,197),
+    Color(252,231,238)
+)
+
 @Composable
-fun PlayerListScreen(modifier: Modifier, onAddNewPlayer: (String?) -> Unit) {
+fun PlayerListScreen(modifier: Modifier, onAddNewPlayer: (Int) -> Unit) {
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 20.dp)
     ) {
         val scope = rememberCoroutineScope()
         val context = LocalContext.current
@@ -65,29 +87,36 @@ fun PlayerListScreen(modifier: Modifier, onAddNewPlayer: (String?) -> Unit) {
                 Log.i("", allPlayers!!.size.toString())
             }
         }
-        LazyColumn(verticalArrangement = Arrangement.spacedBy(12.dp),
+
+        LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 128.dp),
+            verticalArrangement = Arrangement.spacedBy(4.dp),
+            horizontalArrangement = Arrangement.spacedBy(4.dp),
             modifier = modifier
                 .fillMaxSize()
                 .constrainAs(playerListLazyColumn) {
-                    top.linkTo(parent.top)
-                    bottom.linkTo(buttonBackground.top)
+                    top.linkTo(parent.top, margin = 40.dp)
+                    bottom.linkTo(buttonBackground.top, margin = 100.dp)
                     absoluteLeft.linkTo(parent.absoluteLeft)
                     absoluteRight.linkTo(parent.absoluteRight)
                 }) {
             items(allPlayers) {
-                Row(verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween,
+                Column(horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.SpaceEvenly,
                     modifier = Modifier
                         .clickable {
-                            onAddNewPlayer(it.name)
+                            onAddNewPlayer(it.id)
                         }
                         .fillMaxWidth()
-                        .height(48.dp)
+                        .background(colors[Math.abs(it.name.hashCode() % colors.size)])
+                        .height(128.dp)
                 ) {
                     Text(
-                        text = it.name, fontSize = 24.sp
+                        text = it.name, fontSize = 24.sp, fontWeight = FontWeight.Bold
                     )
-                    Image(painter = painterResource(id = R.drawable.ic_menu_edit), contentDescription = "")
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_menu_edit),
+                        contentDescription = ""
+                    )
                 }
             }
         }
@@ -101,7 +130,7 @@ fun PlayerListScreen(modifier: Modifier, onAddNewPlayer: (String?) -> Unit) {
                     bottom.linkTo(parent.bottom)
                     top.linkTo(addNewPlayerButton.top)
                 })
-        Button(onClick = { onAddNewPlayer(null) },
+        Button(onClick = { onAddNewPlayer(0) },
             modifier = Modifier
                 .fillMaxWidth(0.8f)
                 .constrainAs(addNewPlayerButton) {
@@ -111,6 +140,8 @@ fun PlayerListScreen(modifier: Modifier, onAddNewPlayer: (String?) -> Unit) {
                 }) {
             Text(text = "Add New Player")
         }
+
+
 
     }
 

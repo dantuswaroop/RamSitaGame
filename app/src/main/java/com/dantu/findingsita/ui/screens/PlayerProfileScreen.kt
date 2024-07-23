@@ -32,13 +32,14 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class AddOrEditPlayer(var playerId : String?)
+data class AddOrEditPlayer(var playerId : Int)
 
 @Composable
 fun PlayerProfileScreen(
-    playerId : String?,
+    playerId : Int,
     onSaveClicked: (String, Int) -> Unit,
-    onCancel: () -> Unit
+    onCancel: () -> Unit,
+    onDelete : (Int) -> Unit
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -51,7 +52,7 @@ fun PlayerProfileScreen(
     LaunchedEffect(scope) {
         playerId?.let {
             withContext(Dispatchers.IO) {
-                DataBaseHelper.getInstance(context).playerDao().getPlayer(playerId)?.let {
+                DataBaseHelper.getInstance(context).playerDao().getPlayer(playerId.toInt())?.let {
                     playerName = it.name
                     playerPassword = it.pin.toString()
                 }
@@ -68,6 +69,7 @@ fun PlayerProfileScreen(
         val (nameTitle, nameField, passwordTitle, passwordField) = createRefs()
         val saveButton = createRef()
         val cancelButton = createRef()
+        val deletePlayerButton = createRef()
         Text(text = "Name", modifier = Modifier.constrainAs(nameTitle) {
             absoluteLeft.linkTo(parent.absoluteLeft, margin = 20.dp)
             top.linkTo(parent.top, margin = 20.dp)
@@ -113,11 +115,13 @@ fun PlayerProfileScreen(
             ),
             isError = playerName.isBlank() || playerPassword.trim().length < 4,
             keyboardActions = KeyboardActions(onDone = {
-                keyboardController?.hide()
-                onSaveClicked(
-                    playerName,
-                    playerPassword.toInt()
-                )
+                if (playerPassword.length == 4 && playerName.isNotBlank()) {
+                    keyboardController?.hide()
+                    onSaveClicked(
+                        playerName,
+                        playerPassword.toInt()
+                    )
+                }
             }),
             modifier = Modifier
                 .fillMaxWidth(0.9f)
@@ -126,18 +130,20 @@ fun PlayerProfileScreen(
                     absoluteLeft.linkTo(passwordTitle.absoluteLeft)
                 })
         Button(onClick = {
-            keyboardController?.hide()
-            onSaveClicked(
-                playerName,
-                playerPassword.toInt()
-            )
+            if (playerPassword.length == 4 && playerName.isNotBlank()) {
+                keyboardController?.hide()
+                onSaveClicked(
+                    playerName,
+                    playerPassword.toInt()
+                )
+            }
         },
             modifier = Modifier.constrainAs(saveButton) {
                 absoluteLeft.linkTo(parent.absoluteLeft)
                 absoluteRight.linkTo(parent.absoluteRight)
                 top.linkTo(passwordField.bottom, margin = 20.dp)
             }) {
-            Text(text = "Add")
+            Text(text = if(playerId > 0) "Save" else "Add" )
         }
         Button(onClick = {
             keyboardController?.hide()
@@ -149,6 +155,18 @@ fun PlayerProfileScreen(
                 top.linkTo(passwordField.bottom, margin = 20.dp)
             }) {
             Text(text = "Cancel")
+        }
+        if(playerId > 0) {
+            Button(onClick = { onDelete(playerId) },
+                modifier = Modifier
+                    .fillMaxWidth(0.8f)
+                    .constrainAs(deletePlayerButton) {
+                        top.linkTo(saveButton.bottom, margin = 10.dp)
+                        absoluteLeft.linkTo(parent.absoluteLeft)
+                        absoluteRight.linkTo(parent.absoluteRight)
+                    }) {
+                Text(text = "Delete")
+            }
         }
     }
 }

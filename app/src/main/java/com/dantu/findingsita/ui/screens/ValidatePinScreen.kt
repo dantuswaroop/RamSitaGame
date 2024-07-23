@@ -27,10 +27,10 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class EnterPinDialog(val playerId: String)
+data class EnterPinDialog(val playerId: Int)
 
 @Composable
-fun ValidatePin(playerId: String, onValidation: (Boolean) -> Unit) {
+fun ValidatePin(playerId: Int, onValidation: (Boolean) -> Unit) {
     val keyboardController = LocalSoftwareKeyboardController.current
     val context = LocalContext.current
     var playerPin by remember {

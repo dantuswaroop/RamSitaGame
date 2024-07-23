@@ -19,12 +19,19 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.Button
+import androidx.compose.material3.CenterAlignedTopAppBar
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -53,6 +60,7 @@ import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import com.dantu.findingsita.data.DataBaseHelper
+import com.dantu.findingsita.data.dao.PlayerDao
 import com.dantu.findingsita.data.entities.Player
 import com.dantu.findingsita.ui.screens.AddOrEditPlayer
 import com.dantu.findingsita.ui.screens.EnterPinDialog
@@ -74,12 +82,21 @@ object HomeScreen
 
 
 class MainActivity : ComponentActivity() {
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             FindingSitaTheme {
                 val snackbarHostState = remember { SnackbarHostState() }
-                Scaffold(snackbarHost = {
+                Scaffold(topBar = {
+                    CenterAlignedTopAppBar(title = { Text(text = "Finding Sita") },
+                        navigationIcon = {
+                            IconButton(onClick = { /*TODO*/ }) {
+                                Icon(imageVector = Icons.AutoMirrored.Filled.ArrowBack, contentDescription = "")
+                            }
+                        })
+                },
+                    snackbarHost = {
                     SnackbarHost(hostState = snackbarHostState)
                 }, modifier = Modifier.fillMaxSize()) { innerPadding ->
                     Greeting(
@@ -126,8 +143,20 @@ fun Greeting(name: String, modifier: Modifier = Modifier, snackbarHostState: Sna
             PlayerProfileScreen(playerId, onSaveClicked = { playerName, playerPassword ->
                 scope.launch {
                     withContext(Dispatchers.IO) {
-                        DataBaseHelper.getInstance(context).playerDao()
-                            .addPlayer(Player(name = playerName, pin = playerPassword))
+                        playerId?.let {
+                            DataBaseHelper.getInstance(context).playerDao()
+                                .let { playerDao: PlayerDao ->
+                                    playerDao.getPlayer(playerId)?.let { player ->
+                                        player.name = playerName
+                                        player.pin = playerPassword
+                                        playerDao.updatePlayer(player)
+                                    }
+                                }
+
+                        } ?: run {
+                            DataBaseHelper.getInstance(context).playerDao()
+                                .addPlayer(Player(name = playerName, pin = playerPassword))
+                        }
                     }
                     navController.popBackStack()
                     snackbarHostState.showSnackbar("Saved $playerName with password $playerPassword")

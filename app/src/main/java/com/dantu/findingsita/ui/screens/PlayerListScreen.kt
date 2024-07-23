@@ -46,7 +46,7 @@ fun PlayerListScreen(modifier: Modifier, onAddNewPlayer: (String?) -> Unit) {
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 20.dp, vertical = 20.dp)
+            .padding(horizontal = 20.dp)
     ) {
         val scope = rememberCoroutineScope()
         val context = LocalContext.current
@@ -69,7 +69,7 @@ fun PlayerListScreen(modifier: Modifier, onAddNewPlayer: (String?) -> Unit) {
             modifier = modifier
                 .fillMaxSize()
                 .constrainAs(playerListLazyColumn) {
-                    top.linkTo(parent.top, margin = 80.dp)
+                    top.linkTo(parent.top)
                     bottom.linkTo(buttonBackground.top)
                     absoluteLeft.linkTo(parent.absoluteLeft)
                     absoluteRight.linkTo(parent.absoluteRight)

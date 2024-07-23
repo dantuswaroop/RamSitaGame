@@ -5,9 +5,10 @@ import androidx.room.PrimaryKey
 
 @Entity
 data class Player(
-    @PrimaryKey
-    val name : String,
-    val pin : Int,
-    val wins : Int = 0,
-    val profilePic : String? = null
+    @PrimaryKey(autoGenerate = true)
+    val id : Int = 0,
+    var name : String,
+    var pin : Int,
+    var wins : Int = 0,
+    var profilePic : String? = null
 )

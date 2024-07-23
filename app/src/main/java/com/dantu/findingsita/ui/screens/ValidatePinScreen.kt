@@ -19,6 +19,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.dantu.findingsita.data.DataBaseHelper
 import kotlinx.coroutines.Dispatchers
@@ -26,7 +27,7 @@ import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 
 @Serializable
-data class EnterPinDialog(val playerId : String)
+data class EnterPinDialog(val playerId: String)
 
 @Composable
 fun ValidatePin(playerId: String, onValidation: (Boolean) -> Unit) {
@@ -47,12 +48,21 @@ fun ValidatePin(playerId: String, onValidation: (Boolean) -> Unit) {
         }
     }
 
-    Column(Modifier.background(Color.White).padding(40.dp)) {
+    Column(
+        Modifier
+            .background(Color.White)
+            .padding(40.dp)) {
         Text(text = "Enter your password")
         OutlinedTextField(
-            value = enteredPin, onValueChange = {
+            value = enteredPin,
+            onValueChange = {
                 enteredPin = it
-            }, keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done, keyboardType = KeyboardType.NumberPassword),
+            },
+            visualTransformation = PasswordVisualTransformation(),
+            keyboardOptions = KeyboardOptions(
+                imeAction = ImeAction.Done,
+                keyboardType = KeyboardType.NumberPassword,
+            ),
             keyboardActions = KeyboardActions(onDone = {
                 keyboardController?.hide()
                 onValidation(playerPin.toString() == enteredPin)

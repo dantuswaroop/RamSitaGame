@@ -1,13 +1,14 @@
 package com.dantu.findingsita.data.entities
 
+import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 
 @Entity
 data class GameStatus(
     @PrimaryKey(autoGenerate = true)
-    val id : Int = 0,
+    val gameStatusId : Int = 0,
     val gameId : String,
-    val playerId : Int,
-    val score : Int
+    @Embedded val player : Player,
+    var score : Int
 )

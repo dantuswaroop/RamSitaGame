@@ -7,13 +7,13 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -27,7 +27,6 @@ import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dantu.findingsita.data.entities.GameStatus
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 
@@ -35,7 +34,7 @@ import kotlinx.serialization.Serializable
 data class GameLeaderBoard(val gameId:String)
 
 @Composable
-fun GameLeaderBoardScreen(modifier: Modifier = Modifier, gameId : String) {
+fun GameLeaderBoardScreen(modifier: Modifier = Modifier, gameId : String, onReady : () -> Unit) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     val viewModel : GameLeaderboardViewModel = viewModel()
@@ -55,7 +54,7 @@ fun GameLeaderBoardScreen(modifier: Modifier = Modifier, gameId : String) {
         }
         val leaderBoardLazyColumn = createRef()
         val startRoundButton = createRef()
-        Button(onClick = { /*TODO*/ },
+        Button(onClick = onReady,
             modifier = Modifier
                 .fillMaxWidth(0.8f)
                 .constrainAs(startRoundButton) {
@@ -78,13 +77,15 @@ fun GameLeaderBoardScreen(modifier: Modifier = Modifier, gameId : String) {
                 Row(modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp)
-                    .background(colors[it.playerId.hashCode() % colors.size]),
+                    .background(colors[Math.abs(it.player.name.hashCode()) % colors.size]),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "${it.playerId}")
-                    Text(text = "${it.score}")
+                    Text(text = "${it.player.name}", modifier = Modifier.padding(horizontal = 20.dp))
+                    Text(text = "${it.score}", modifier = Modifier.padding(horizontal = 20.dp))
                 }
-                Spacer(modifier = Modifier.height(2.dp).fillMaxWidth())
+                Spacer(modifier = Modifier
+                    .height(2.dp)
+                    .fillMaxWidth())
             }
         }
     }

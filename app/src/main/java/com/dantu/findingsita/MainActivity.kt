@@ -34,7 +34,9 @@ import com.dantu.findingsita.data.DataBaseHelper
 import com.dantu.findingsita.data.dao.PlayerDao
 import com.dantu.findingsita.data.entities.Player
 import com.dantu.findingsita.ui.screens.AddOrEditPlayer
+import com.dantu.findingsita.ui.screens.CharacterScreen
 import com.dantu.findingsita.ui.screens.EnterPinDialog
+import com.dantu.findingsita.ui.screens.EnterPinDialogForReveal
 import com.dantu.findingsita.ui.screens.GameLeaderBoard
 import com.dantu.findingsita.ui.screens.GameLeaderBoardScreen
 import com.dantu.findingsita.ui.screens.LoadGames
@@ -42,7 +44,12 @@ import com.dantu.findingsita.ui.screens.LoadGamesScreen
 import com.dantu.findingsita.ui.screens.PlayerList
 import com.dantu.findingsita.ui.screens.PlayerListScreen
 import com.dantu.findingsita.ui.screens.PlayerProfileScreen
+import com.dantu.findingsita.ui.screens.GameScreen
+import com.dantu.findingsita.ui.screens.GuessResult
+import com.dantu.findingsita.ui.screens.GuessResultDialog
+import com.dantu.findingsita.ui.screens.ShowGameScreen
 import com.dantu.findingsita.ui.screens.SelectPlayers
+import com.dantu.findingsita.ui.screens.ShowCharacterToPlayer
 import com.dantu.findingsita.ui.screens.ValidatePin
 import com.dantu.findingsita.ui.screens.WelcomeScreenComposable
 import com.dantu.findingsita.ui.theme.FindingSitaTheme
@@ -151,7 +158,7 @@ fun Greeting(
                         playerId?.let {
                             DataBaseHelper.getInstance(context).playerDao()
                                 .let { playerDao: PlayerDao ->
-                                    playerDao.getPlayer(playerId.toInt())?.let { player ->
+                                    playerDao.getPlayer(playerId)?.let { player ->
                                         player.name = playerName
                                         player.pin = playerPassword
                                         playerDao.updatePlayer(player)
@@ -196,8 +203,25 @@ fun Greeting(
                 }
             }
         }
+        dialog<EnterPinDialogForReveal> {
+            val enterPinDialog: EnterPinDialogForReveal = it.toRoute<EnterPinDialogForReveal>()
+            ValidatePin(playerId = enterPinDialog.playerId) { valid ->
+                navController.popBackStack()
+                if (valid) {
+//                    navController.navigate(
+//                        AddOrEditPlayer(playerId = enterPinDialog.playerId)
+//                    )
+                    navController.navigate(CharacterScreen(enterPinDialog.characterId))
+                } else {
+                    scope.launch {
+                        snackbarHostState.showSnackbar("Entered pin is $valid")
+                    }
+                }
+            }
+        }
 
         composable<SelectPlayers> {
+            title("Select Players")
             SelectPlayers(modifier, mutableListOf<Int>(), onPlayersSelected = {gameId ->
                 navController.popBackStack()
                 navController.navigate(GameLeaderBoard(gameId = gameId))
@@ -210,14 +234,41 @@ fun Greeting(
         }
 
         composable<GameLeaderBoard> {
+            title("Score Board")
             val gameLeaderBoard : GameLeaderBoard = it.toRoute()
-            GameLeaderBoardScreen(modifier, gameId = gameLeaderBoard.gameId)
+            GameLeaderBoardScreen(modifier, gameId = gameLeaderBoard.gameId) {
+                navController.popBackStack()
+                navController.navigate(GameScreen(gameLeaderBoard.gameId))
+            }
         }
         
-        composable<LoadGames> { 
+        composable<LoadGames> {
+            title("Saved Games")
             LoadGamesScreen(modifier = modifier) {gameId ->
                 navController.navigate(GameLeaderBoard(gameId))
             }
+        }
+
+        composable<GameScreen> {
+            val reveal : GameScreen = it.toRoute()
+            ShowGameScreen(modifier = modifier, gameId = reveal.gameId, onPlayerClicked =
+            { playerId, characterId ->
+              navController.navigate(EnterPinDialogForReveal(playerId, characterId))
+            }, onRoundFinished = {success ->
+                navController.popBackStack()
+                navController.navigate(GameLeaderBoard(reveal.gameId))
+                navController.navigate(GuessResult(success = success))
+            })
+        }
+
+        composable<CharacterScreen> {
+            val character : CharacterScreen = it.toRoute()
+            ShowCharacterToPlayer(modifier, character.characterId)
+        }
+
+        dialog<GuessResult> {
+            val guessResult : GuessResult = it.toRoute()
+            GuessResultDialog(modifier = modifier, success = guessResult.success)
         }
     }
 }

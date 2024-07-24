@@ -36,7 +36,7 @@ class SelectPlayersViewModel : ViewModel() {
         DataBaseHelper.getInstance(context = context).gameDao().createGame(game)
         with(DataBaseHelper.getInstance(context).gameStatusDao()) {
             _allPlayers.value.filter { it.selected }.forEach { player ->
-                insertPlayerRecord(GameStatus(gameId = game.id, playerId = player.id, score = 0))
+                insertPlayerRecord(GameStatus(gameId = game.id, player = player, score = 0))
             }
         }
         return game.id

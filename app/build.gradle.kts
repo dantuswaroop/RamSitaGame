@@ -59,6 +59,11 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.constraintlayout.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+    implementation("io.coil-kt:coil-compose:2.7.0")
+    implementation("io.coil-kt:coil-gif:2.7.0")
+    implementation("com.google.accompanist:accompanist-drawablepainter:0.35.0-alpha")
+
+
 
     implementation(libs.androidx.room.runtime)
     annotationProcessor(libs.androidx.room.compiler)

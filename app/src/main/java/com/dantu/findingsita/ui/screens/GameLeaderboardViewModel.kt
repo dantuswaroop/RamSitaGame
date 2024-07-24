@@ -13,6 +13,6 @@ class GameLeaderboardViewModel : ViewModel() {
     val gameStatus : StateFlow<List<GameStatus>> = _gameStatus
 
     suspend fun getLeaderBoard(context: Context, gameId : String) {
-        _gameStatus.value = DataBaseHelper.getInstance(context = context).gameStatusDao().getGameStatus(gameId)
+        _gameStatus.value = DataBaseHelper.getInstance(context = context).gameStatusDao().getGameStatus(gameId).sortedByDescending { it.score }
     }
 }

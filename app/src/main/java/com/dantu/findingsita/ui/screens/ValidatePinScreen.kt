@@ -29,6 +29,9 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class EnterPinDialog(val playerId: Int)
 
+@Serializable
+data class EnterPinDialogForReveal(val playerId: Int, val characterId : Int)
+
 @Composable
 fun ValidatePin(playerId: Int, onValidation: (Boolean) -> Unit) {
     val keyboardController = LocalSoftwareKeyboardController.current

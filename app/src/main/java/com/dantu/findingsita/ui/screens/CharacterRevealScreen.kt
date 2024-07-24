@@ -30,68 +30,58 @@ import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dantu.findingsita.R
+import com.dantu.findingsita.data.entities.CharacterType
 import com.dantu.findingsita.data.entities.Player
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 
+
 @Serializable
-object SelectPlayers
+data class GameScreen(val gameId: String)
 
 
 @Composable
-fun SelectPlayers(
+fun ShowGameScreen(
     modifier: Modifier,
-    selectedPlayers : MutableList<Int>,
-    onPlayersSelected: (String) -> Unit,
-    onMessage: (String) -> Unit
+    gameId: String,
+    onPlayerClicked: (playerId: Int, characterId: Int) -> Unit,
+    onRoundFinished : (Boolean) -> Unit
 ) {
-    val selectPlayersViewModel : SelectPlayersViewModel  = viewModel()
-    ConstraintLayout(modifier = modifier.fillMaxSize()) {
-        val createGameButton = createRef()
-        val playersGrid = createRef()
+    val viewModel: RevealCharacterViewModel = viewModel()
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
 
-        val scope = rememberCoroutineScope()
-        val context = LocalContext.current
-        var allPlayers by remember {
-            mutableStateOf<List<Player>>(mutableListOf())
-        }
+    var players by remember {
+        mutableStateOf(listOf<Player>())
+    }
 
+    var finding by remember {
+        mutableStateOf(false)
+    }
+
+    ConstraintLayout(modifier.fillMaxSize()) {
 
         LaunchedEffect(key1 = scope) {
-            launch {
-                withContext(Dispatchers.IO) {
-                    selectPlayersViewModel.getPlayers(context)
-                    selectPlayersViewModel.allPlayers.collect {
-                        allPlayers = it
-                    }
-                }
+            withContext(Dispatchers.IO) {
+                players = viewModel.getPlayersWithCharacters(context, gameId)
             }
         }
-
-        Button(onClick = {
-            val selectedPlayers = selectPlayersViewModel.allPlayers.value.filter { it.selected }
-            if(selectedPlayers.size > 2) {
-                //correct
-                scope.launch(Dispatchers.IO) {
-                    val gameId = selectPlayersViewModel.createGameWithPlayers(context)
-                    withContext(Dispatchers.Main) {
-                        onPlayersSelected(gameId)
-                    }
-                }
-            } else {
-                onMessage("Please select atleast 3 players")
+        val (startGame, playersGrid) = createRefs()
+        if (finding.not()) {
+            Button(onClick = {
+                finding = true
+            },
+                modifier = Modifier
+                    .fillMaxWidth(0.8f)
+                    .constrainAs(startGame) {
+                        bottom.linkTo(parent.bottom, margin = 20.dp)
+                        absoluteLeft.linkTo(parent.absoluteLeft)
+                        absoluteRight.linkTo(parent.absoluteRight)
+                    }) {
+                Text(text = "Start Finding")
             }
-        },
-            modifier = Modifier
-                .fillMaxWidth(0.8f)
-                .constrainAs(createGameButton) {
-                    bottom.linkTo(parent.bottom, margin = 20.dp)
-                    absoluteLeft.linkTo(parent.absoluteLeft)
-                    absoluteRight.linkTo(parent.absoluteRight)
-                }) {
-            Text(text = "Done")
         }
 
         LazyVerticalGrid(columns = GridCells.Adaptive(minSize = 128.dp),
@@ -100,27 +90,42 @@ fun SelectPlayers(
             modifier = Modifier
                 .constrainAs(playersGrid) {
                     top.linkTo(parent.top, margin = 40.dp)
-                    bottom.linkTo(createGameButton.top, margin = 120.dp)
+                    bottom.linkTo(startGame.top, margin = 120.dp)
                     absoluteLeft.linkTo(parent.absoluteLeft)
                     absoluteRight.linkTo(parent.absoluteRight)
                 }) {
-            itemsIndexed(items = allPlayers) { index, it ->
+            itemsIndexed(items = players) { index, it ->
                 Column(horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.SpaceEvenly,
                     modifier = Modifier
                         .clickable {
-                            scope.launch {
-                                selectPlayersViewModel.toggleSelection(index)
+                            if (finding) {
+                                //evaluate and update the score boards
+                                scope.launch {
+                                    withContext(Dispatchers.IO) {
+                                        val success = viewModel.validateResult(context, it.playerId)
+                                        withContext(Dispatchers.Main) {
+                                            onRoundFinished(success)
+                                        }
+                                    }
+                                }
+                            } else {
+                                //verifywith pin
+                                onPlayerClicked(it.playerId, it.character?.characterId ?: 0)
                             }
                         }
                         .fillMaxWidth()
                         .background(colors[Math.abs(it.name.hashCode() % colors.size)])
                         .height(128.dp)
                 ) {
+                    var name = it.name
+                    if(finding && it.character?.type == CharacterType.FIND) {
+                        name += " " + it.character?.name
+                    }
                     Text(
-                        text = it.name, fontSize = 24.sp, fontWeight = FontWeight.Bold
+                        text = name, fontSize = 24.sp, fontWeight = FontWeight.Bold
                     )
-                    if(it.selected) {
+                    if (it.selected) {
                         Image(
                             painter = painterResource(id = R.drawable.baseline_check_24),
                             contentDescription = ""
@@ -130,4 +135,5 @@ fun SelectPlayers(
             }
         }
     }
+
 }

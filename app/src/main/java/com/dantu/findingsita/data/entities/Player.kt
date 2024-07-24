@@ -7,10 +7,11 @@ import androidx.room.PrimaryKey
 @Entity
 data class Player @JvmOverloads constructor(
     @PrimaryKey(autoGenerate = true)
-    var id : Int = 0,
+    var playerId : Int = 0,
     var name : String,
     var pin : Int,
     var wins : Int = 0,
     var profilePic : String? = null,
-    @Ignore var selected : Boolean = false
+    @Ignore var selected : Boolean = false,
+    @Ignore var character: Character? = null
 )

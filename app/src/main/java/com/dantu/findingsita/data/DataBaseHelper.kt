@@ -9,7 +9,7 @@ object DataBaseHelper {
     fun getInstance(context: Context): GameDataBase {
         if (database == null) {
             database =
-                Room.databaseBuilder(context, GameDataBase::class.java, "game-database").build()
+                Room.databaseBuilder(context, GameDataBase::class.java, "game-database").fallbackToDestructiveMigration().build()
         }
         return database!!
     }

@@ -35,9 +35,14 @@ import com.dantu.findingsita.data.dao.PlayerDao
 import com.dantu.findingsita.data.entities.Player
 import com.dantu.findingsita.ui.screens.AddOrEditPlayer
 import com.dantu.findingsita.ui.screens.EnterPinDialog
+import com.dantu.findingsita.ui.screens.GameLeaderBoard
+import com.dantu.findingsita.ui.screens.GameLeaderBoardScreen
+import com.dantu.findingsita.ui.screens.LoadGames
+import com.dantu.findingsita.ui.screens.LoadGamesScreen
 import com.dantu.findingsita.ui.screens.PlayerList
 import com.dantu.findingsita.ui.screens.PlayerListScreen
 import com.dantu.findingsita.ui.screens.PlayerProfileScreen
+import com.dantu.findingsita.ui.screens.SelectPlayers
 import com.dantu.findingsita.ui.screens.ValidatePin
 import com.dantu.findingsita.ui.screens.WelcomeScreenComposable
 import com.dantu.findingsita.ui.theme.FindingSitaTheme
@@ -63,17 +68,18 @@ class MainActivity : ComponentActivity() {
                     mutableStateOf("Finding Sita")
                 }
                 val navController = rememberNavController()
-                Scaffold(topBar = {
-                    TopAppBar(title = { Text(text = screenTitle) },
-                        navigationIcon = {
-                            IconButton(onClick = { navController.popBackStack() }) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                    contentDescription = ""
-                                )
-                            }
-                        })
-                },
+                Scaffold(
+                    topBar = {
+                        TopAppBar(title = { Text(text = screenTitle) },
+                            navigationIcon = {
+                                IconButton(onClick = { navController.popBackStack() }) {
+                                    Icon(
+                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                        contentDescription = ""
+                                    )
+                                }
+                            })
+                    },
                     snackbarHost = {
                         SnackbarHost(hostState = snackbarHostState)
                     }, modifier = Modifier.fillMaxSize()
@@ -109,17 +115,22 @@ fun Greeting(
 
         composable<HomeScreen> {
             title("Finding Sita")
-            WelcomeScreenComposable {
+            WelcomeScreenComposable(onPlayers = {
                 navController.navigate(PlayerList)
+            }, onStartGame = {
+                navController.navigate(SelectPlayers)
+            }, loadGame = {
+                navController.navigate(LoadGames)
             }
+            )
         }
 
         composable<PlayerList> {
             title("Players")
             PlayerListScreen(modifier, onAddNewPlayer = { playerId ->
-                if(playerId > 0) {
+                if (playerId > 0) {
                     navController.navigate(EnterPinDialog(playerId = playerId))
-                } else  {
+                } else {
                     navController.navigate(AddOrEditPlayer(playerId))
                 }
 
@@ -129,7 +140,7 @@ fun Greeting(
         composable<AddOrEditPlayer> {
             val playerId = it.toRoute<AddOrEditPlayer>().playerId
             val context = LocalContext.current
-            if(playerId > 0) {
+            if (playerId > 0) {
                 title("Edit Player")
             } else {
                 title("Add New Player")
@@ -161,7 +172,8 @@ fun Greeting(
                 onDelete = { playerId ->
                     scope.launch {
                         withContext(Dispatchers.IO) {
-                            DataBaseHelper.getInstance(context).playerDao().deletePlayer(Player(playerId.toInt(), "", 0))
+                            DataBaseHelper.getInstance(context).playerDao()
+                                .deletePlayer(Player(playerId.toInt(), "", 0))
                         }
                     }
                     navController.popBackStack()
@@ -185,6 +197,28 @@ fun Greeting(
             }
         }
 
+        composable<SelectPlayers> {
+            SelectPlayers(modifier, mutableListOf<Int>(), onPlayersSelected = {gameId ->
+                navController.popBackStack()
+                navController.navigate(GameLeaderBoard(gameId = gameId))
+                //Navigate to Leaderboard screen with start Game Button
+            }, onMessage =  {
+                scope.launch {
+                    snackbarHostState.showSnackbar(it)
+                }
+            })
+        }
+
+        composable<GameLeaderBoard> {
+            val gameLeaderBoard : GameLeaderBoard = it.toRoute()
+            GameLeaderBoardScreen(modifier, gameId = gameLeaderBoard.gameId)
+        }
+        
+        composable<LoadGames> { 
+            LoadGamesScreen(modifier = modifier) {gameId ->
+                navController.navigate(GameLeaderBoard(gameId))
+            }
+        }
     }
 }
 

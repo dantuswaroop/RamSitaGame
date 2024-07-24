@@ -1,14 +1,16 @@
 package com.dantu.findingsita.data.entities
 
 import androidx.room.Entity
+import androidx.room.Ignore
 import androidx.room.PrimaryKey
 
 @Entity
-data class Player(
+data class Player @JvmOverloads constructor(
     @PrimaryKey(autoGenerate = true)
-    val id : Int = 0,
+    var id : Int = 0,
     var name : String,
     var pin : Int,
     var wins : Int = 0,
-    var profilePic : String? = null
+    var profilePic : String? = null,
+    @Ignore var selected : Boolean = false
 )

@@ -1,6 +1,7 @@
 package com.dantu.findingsita.ui.screens
 
 import androidx.compose.foundation.Image
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -22,16 +23,24 @@ import kotlinx.serialization.Serializable
 data class CharacterScreen(val characterId: Int)
 
 @Composable
-fun ShowCharacterToPlayer(modifier: Modifier, characterId: Int) {
+fun ShowCharacterToPlayer(modifier: Modifier, characterId: Int, goBack: () -> Unit) {
     val character = characters.filter { it.characterId == characterId }[0]
-    Column(modifier.fillMaxSize(),
+    Column(
+        Modifier
+            .fillMaxSize()
+            .clickable {
+                goBack()
+            },
         horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.SpaceEvenly) {
+        verticalArrangement = Arrangement.SpaceEvenly
+    ) {
         Text(text = "${character.name}", fontSize = 48.sp, fontWeight = FontWeight.ExtraBold)
         Image(painter = painterResource(id = character.image), contentDescription = "")
-        Spacer(modifier = Modifier
-            .height(10.dp)
-            .fillMaxWidth())
+        Spacer(
+            modifier = Modifier
+                .height(10.dp)
+                .fillMaxWidth()
+        )
         Text(text = "${character.points}", fontSize = 24.sp)
     }
 

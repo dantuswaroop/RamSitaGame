@@ -250,6 +250,7 @@ fun Greeting(
         }
 
         composable<GameScreen> {
+            title("Game")
             val reveal : GameScreen = it.toRoute()
             ShowGameScreen(modifier = modifier, gameId = reveal.gameId, onPlayerClicked =
             { playerId, characterId ->
@@ -262,8 +263,11 @@ fun Greeting(
         }
 
         composable<CharacterScreen> {
+            title("Your Character")
             val character : CharacterScreen = it.toRoute()
-            ShowCharacterToPlayer(modifier, character.characterId)
+            ShowCharacterToPlayer(modifier, character.characterId) {
+                navController.popBackStack()
+            }
         }
 
         dialog<GuessResult> {

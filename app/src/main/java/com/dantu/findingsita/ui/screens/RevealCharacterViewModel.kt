@@ -8,9 +8,12 @@ import com.dantu.findingsita.data.entities.CharacterType
 import com.dantu.findingsita.data.entities.GameStatus
 import com.dantu.findingsita.data.entities.Player
 import com.dantu.findingsita.data.entities.characters
+import dagger.hilt.android.lifecycle.HiltViewModel
 import java.util.Random
+import javax.inject.Inject
 
-class RevealCharacterViewModel : ViewModel() {
+@HiltViewModel
+class RevealCharacterViewModel @Inject constructor() : ViewModel() {
 
     private var players: List<Player>? = null
     private lateinit var gameStatuses: List<GameStatus>

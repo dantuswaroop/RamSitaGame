@@ -6,13 +6,16 @@ import com.dantu.findingsita.data.DataBaseHelper
 import com.dantu.findingsita.data.entities.Game
 import com.dantu.findingsita.data.entities.GameStatus
 import com.dantu.findingsita.data.entities.Player
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import java.util.Date
 import java.util.UUID
+import javax.inject.Inject
 
-class SelectPlayersViewModel : ViewModel() {
+@HiltViewModel
+class SelectPlayersViewModel @Inject constructor() : ViewModel() {
     private val _allPlayers = MutableStateFlow(mutableListOf<Player>())
     val allPlayers: StateFlow<MutableList<Player>> = _allPlayers
 

@@ -5,10 +5,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import com.dantu.findingsita.data.DataBaseHelper
 import com.dantu.findingsita.data.entities.GameStatus
+import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import javax.inject.Inject
 
-class GameLeaderboardViewModel : ViewModel() {
+@HiltViewModel
+class GameLeaderboardViewModel @Inject constructor() : ViewModel() {
     private val _gameStatus  = MutableStateFlow(listOf<GameStatus>())
     val gameStatus : StateFlow<List<GameStatus>> = _gameStatus
 

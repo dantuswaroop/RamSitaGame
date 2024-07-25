@@ -53,6 +53,8 @@ import com.dantu.findingsita.ui.screens.ShowCharacterToPlayer
 import com.dantu.findingsita.ui.screens.ValidatePin
 import com.dantu.findingsita.ui.screens.WelcomeScreenComposable
 import com.dantu.findingsita.ui.theme.FindingSitaTheme
+import dagger.hilt.android.AndroidEntryPoint
+import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -61,7 +63,7 @@ import kotlinx.serialization.Serializable
 @Serializable
 object HomeScreen
 
-
+@AndroidEntryPoint
 class MainActivity : ComponentActivity() {
 
 

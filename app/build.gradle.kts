@@ -5,6 +5,8 @@ plugins {
     id("kotlinx-serialization")
     id("com.google.devtools.ksp") version "2.0.10-RC-1.0.23"
     alias(libs.plugins.compose.compiler)
+    id("kotlin-kapt")
+    id("com.google.dagger.hilt.android")
 }
 
 android {
@@ -53,6 +55,11 @@ android {
     }
 }
 
+// Allow references to generated code
+kapt {
+    correctErrorTypes = true
+}
+
 dependencies {
 
     implementation(libs.androidx.navigation.compose)
@@ -62,7 +69,8 @@ dependencies {
     implementation("io.coil-kt:coil-compose:2.7.0")
     implementation("io.coil-kt:coil-gif:2.7.0")
     implementation("com.google.accompanist:accompanist-drawablepainter:0.35.0-alpha")
-
+    implementation("com.google.dagger:hilt-android:2.44")
+    kapt("com.google.dagger:hilt-android-compiler:2.44")
 
 
     implementation(libs.androidx.room.runtime)

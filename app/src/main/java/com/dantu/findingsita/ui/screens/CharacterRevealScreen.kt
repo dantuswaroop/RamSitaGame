@@ -120,7 +120,7 @@ fun ShowGameScreen(
                 ) {
                     var name = it.name
                     if(finding && it.character?.type == CharacterType.FIND) {
-                        name += " " + it.character?.name
+                        name += "-" + it.character?.name
                     }
                     Text(
                         text = name, fontSize = 24.sp, fontWeight = FontWeight.Bold

@@ -11,6 +11,8 @@ import com.dantu.findingsita.domain.usecase.CreateOrUpdatePlayerUseCase
 import com.dantu.findingsita.domain.usecase.CreateOrUpdatePlayerUseCaseDefault
 import com.dantu.findingsita.domain.usecase.DeletePlayerUseCase
 import com.dantu.findingsita.domain.usecase.DeletePlayerUseCaseDefault
+import com.dantu.findingsita.domain.usecase.GetPlayerUseCase
+import com.dantu.findingsita.domain.usecase.GetPlayerUseCaseDefault
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -38,12 +40,17 @@ class AppModule {
 
     @Provides
     @Singleton
-    fun provideCreateUpdatePlayerUSeCase(playerRepository: PlayerRepository) : CreateOrUpdatePlayerUseCase =
+    fun provideCreateUpdatePlayerUSeCase(playerRepository: PlayerRepository): CreateOrUpdatePlayerUseCase =
         CreateOrUpdatePlayerUseCaseDefault(playerRepository)
 
     @Provides
     @Singleton
-    fun provideDeletePlayerUseCase(playerRepository: PlayerRepository) : DeletePlayerUseCase =
+    fun provideDeletePlayerUseCase(playerRepository: PlayerRepository): DeletePlayerUseCase =
         DeletePlayerUseCaseDefault(playerRepository)
+
+    @Provides
+    @Singleton
+    fun provideGetPlayerUseCase(playerRepository: PlayerRepository): GetPlayerUseCase =
+        GetPlayerUseCaseDefault(playerRepository)
 
 }

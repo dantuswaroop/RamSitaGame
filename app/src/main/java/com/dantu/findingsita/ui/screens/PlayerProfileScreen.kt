@@ -46,7 +46,6 @@ fun PlayerProfileScreen(
 ) {
     val viewModel : PlayerProfileViewModel = hiltViewModel()
     val scope = rememberCoroutineScope()
-    val context = LocalContext.current
     var playerName by rememberSaveable {
         mutableStateOf("")
     }
@@ -54,11 +53,14 @@ fun PlayerProfileScreen(
         mutableStateOf("")
     }
     LaunchedEffect(scope) {
-        playerId?.let {
-            withContext(Dispatchers.IO) {
-                DataBaseHelper.getInstance(context).playerDao().getPlayer(playerId.toInt())?.let {
-                    playerName = it.name
-                    playerPassword = it.pin.toString()
+        withContext(Dispatchers.IO) {
+            if(playerId > 0) {
+                viewModel.getPlayer(playerId)
+                viewModel.playerData.collect {
+                    it?.let {
+                        playerName = it.name
+                        playerPassword = it.pin.toString()
+                    }
                 }
             }
         }

@@ -20,4 +20,8 @@ class PlayerRepositoryDefault @Inject constructor(private val gameDataBase: Game
     override suspend fun deletePlayer(playerId: Int) {
         gameDataBase.playerDao().deletePlayer(Player(playerId = playerId, "", 0))
     }
+
+    override suspend fun getPlayer(playerId: Int) : Player? =
+        gameDataBase.playerDao().getPlayer(playerId)
+
 }

@@ -7,5 +7,6 @@ interface PlayerRepository {
     suspend fun getPlayers() : List<Player>
     suspend fun createOrUpdatePlayer(id : Int?, name: String, pin: Int)
     suspend fun deletePlayer(playerId: Int)
+    suspend fun getPlayer(playerId: Int) : Player?
 
 }

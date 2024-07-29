@@ -32,10 +32,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
-import com.dantu.findingsita.data.DataBaseHelper
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dantu.findingsita.data.entities.Player
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import kotlinx.serialization.Serializable
 
@@ -59,8 +59,11 @@ val colors = listOf<Color>(Color(255, 170, 186),
     Color(252,231,238)
 )
 
+
 @Composable
 fun PlayerListScreen(modifier: Modifier, onAddNewPlayer: (Int) -> Unit) {
+    val viewModel  : PlayerListViewModel  = hiltViewModel()
+
     ConstraintLayout(
         modifier = Modifier
             .fillMaxSize()
@@ -77,9 +80,11 @@ fun PlayerListScreen(modifier: Modifier, onAddNewPlayer: (Int) -> Unit) {
 
         LaunchedEffect(key1 = scope) {
             launch(Dispatchers.IO) {
-                allPlayers =
-                    DataBaseHelper.getInstance(context).playerDao().getAllPlayers().first()
-                Log.i("", allPlayers!!.size.toString())
+                viewModel.getAllPlayers()
+                viewModel.playersData.collect() {
+                    allPlayers = it
+                    Log.i("", allPlayers!!.size.toString())
+                }
             }
         }
 
@@ -135,8 +140,6 @@ fun PlayerListScreen(modifier: Modifier, onAddNewPlayer: (Int) -> Unit) {
                 }) {
             Text(text = "Add New Player")
         }
-
-
 
     }
 

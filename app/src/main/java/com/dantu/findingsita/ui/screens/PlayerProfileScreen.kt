@@ -26,8 +26,11 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewModelScope
 import com.dantu.findingsita.data.DataBaseHelper
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
 
@@ -37,10 +40,11 @@ data class AddOrEditPlayer(var playerId : Int)
 @Composable
 fun PlayerProfileScreen(
     playerId : Int,
-    onSaveClicked: (String, Int) -> Unit,
+    onSaveClicked: () -> Unit,
     onCancel: () -> Unit,
-    onDelete : (Int) -> Unit
+    onDelete : () -> Unit
 ) {
+    val viewModel : PlayerProfileViewModel = hiltViewModel()
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
     var playerName by rememberSaveable {
@@ -117,10 +121,10 @@ fun PlayerProfileScreen(
             keyboardActions = KeyboardActions(onDone = {
                 if (playerPassword.length == 4 && playerName.isNotBlank()) {
                     keyboardController?.hide()
-                    onSaveClicked(
-                        playerName,
-                        playerPassword.toInt()
-                    )
+                    viewModel.viewModelScope.launch {
+                        viewModel.createOrUpdatePlayer(playerId, playerName, playerPassword.toInt())
+                    }
+                    onSaveClicked()
                 }
             }),
             modifier = Modifier
@@ -132,10 +136,10 @@ fun PlayerProfileScreen(
         Button(onClick = {
             if (playerPassword.length == 4 && playerName.isNotBlank()) {
                 keyboardController?.hide()
-                onSaveClicked(
-                    playerName,
-                    playerPassword.toInt()
-                )
+                viewModel.viewModelScope.launch {
+                    viewModel.createOrUpdatePlayer(playerId, playerName, playerPassword.toInt())
+                }
+                onSaveClicked()
             }
         },
             modifier = Modifier.constrainAs(saveButton) {
@@ -157,7 +161,10 @@ fun PlayerProfileScreen(
             Text(text = "Cancel")
         }
         if(playerId > 0) {
-            Button(onClick = { onDelete(playerId) },
+            Button(onClick = {
+                viewModel.deletePlayer(playerId)
+                onDelete()
+                             },
                 modifier = Modifier
                     .fillMaxWidth(0.8f)
                     .constrainAs(deletePlayerButton) {

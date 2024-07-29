@@ -28,6 +28,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.dantu.findingsita.R
 import com.dantu.findingsita.data.entities.Player
@@ -47,7 +48,7 @@ fun SelectPlayers(
     onPlayersSelected: (String) -> Unit,
     onMessage: (String) -> Unit
 ) {
-    val selectPlayersViewModel : SelectPlayersViewModel  = viewModel()
+    val selectPlayersViewModel : SelectPlayersViewModel  = hiltViewModel()
     ConstraintLayout(modifier = modifier.fillMaxSize()) {
         val createGameButton = createRef()
         val playersGrid = createRef()

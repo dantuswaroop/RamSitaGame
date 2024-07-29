@@ -71,6 +71,7 @@ dependencies {
     implementation(libs.accompanist.drawablepainter)
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
+    implementation(libs.hilt.compose.navigation)
 
 
     implementation(libs.androidx.room.runtime)

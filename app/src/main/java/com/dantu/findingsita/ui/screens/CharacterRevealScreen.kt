@@ -33,6 +33,7 @@ import com.dantu.findingsita.R
 import com.dantu.findingsita.data.entities.CharacterType
 import com.dantu.findingsita.data.entities.Player
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.serialization.Serializable
@@ -41,13 +42,20 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class GameScreen(val gameId: String)
 
+private enum class ScreenState {
+    REVEALING,
+    FINDING,
+    RESULT
+}
+
 
 @Composable
 fun ShowGameScreen(
     modifier: Modifier,
     gameId: String,
     onPlayerClicked: (playerId: Int, characterId: Int) -> Unit,
-    onRoundFinished : (Boolean) -> Unit
+    onRoundResult : (Boolean) -> Unit,
+    showLeaderBoard : () -> Unit
 ) {
     val viewModel: RevealCharacterViewModel = viewModel()
     val scope = rememberCoroutineScope()
@@ -58,7 +66,7 @@ fun ShowGameScreen(
     }
 
     var finding by remember {
-        mutableStateOf(false)
+        mutableStateOf(ScreenState.REVEALING)
     }
 
     ConstraintLayout(modifier.fillMaxSize()) {
@@ -69,9 +77,9 @@ fun ShowGameScreen(
             }
         }
         val (startGame, playersGrid) = createRefs()
-        if (finding.not()) {
+        if (finding == ScreenState.REVEALING) {
             Button(onClick = {
-                finding = true
+                finding = ScreenState.FINDING
             },
                 modifier = Modifier
                     .fillMaxWidth(0.8f)
@@ -99,19 +107,24 @@ fun ShowGameScreen(
                     verticalArrangement = Arrangement.SpaceEvenly,
                     modifier = Modifier
                         .clickable {
-                            if (finding) {
+                            if (finding == ScreenState.FINDING) {
                                 //evaluate and update the score boards
                                 scope.launch {
                                     withContext(Dispatchers.IO) {
                                         val success = viewModel.validateResult(context, it.playerId)
                                         withContext(Dispatchers.Main) {
-                                            onRoundFinished(success)
+                                            onRoundResult(success)
+                                            finding = ScreenState.RESULT
+                                            delay(5_000)
+                                            showLeaderBoard()
                                         }
                                     }
                                 }
-                            } else {
+                            } else if (finding == ScreenState.REVEALING) {
                                 //verifywith pin
                                 onPlayerClicked(it.playerId, it.character?.characterId ?: 0)
+                            } else if (finding == ScreenState.RESULT) {
+                                showLeaderBoard()
                             }
                         }
                         .fillMaxWidth()
@@ -119,8 +132,10 @@ fun ShowGameScreen(
                         .height(128.dp)
                 ) {
                     var name = it.name
-                    if(finding && it.character?.type == CharacterType.FIND) {
-                        name += "-" + it.character?.name
+                    if (finding == ScreenState.FINDING && it.character?.type == CharacterType.FIND) {
+                        name += "\n" + it.character?.name
+                    } else if (finding == ScreenState.RESULT) {
+                        name += "\n" + it.character?.name
                     }
                     Text(
                         text = name, fontSize = 24.sp, fontWeight = FontWeight.Bold

@@ -54,7 +54,6 @@ import com.dantu.findingsita.ui.screens.ValidatePin
 import com.dantu.findingsita.ui.screens.WelcomeScreenComposable
 import com.dantu.findingsita.ui.theme.FindingSitaTheme
 import dagger.hilt.android.AndroidEntryPoint
-import dagger.hilt.android.HiltAndroidApp
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -77,21 +76,18 @@ class MainActivity : ComponentActivity() {
                     mutableStateOf("Finding Sita")
                 }
                 val navController = rememberNavController()
-                Scaffold(
-                    topBar = {
-                        TopAppBar(title = { Text(text = screenTitle) },
-                            navigationIcon = {
-                                IconButton(onClick = { navController.popBackStack() }) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                        contentDescription = ""
-                                    )
-                                }
-                            })
-                    },
-                    snackbarHost = {
-                        SnackbarHost(hostState = snackbarHostState)
-                    }, modifier = Modifier.fillMaxSize()
+                Scaffold(topBar = {
+                    TopAppBar(title = { Text(text = screenTitle) }, navigationIcon = {
+                        IconButton(onClick = { navController.popBackStack() }) {
+                            Icon(
+                                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = ""
+                            )
+                        }
+                    })
+                }, snackbarHost = {
+                    SnackbarHost(hostState = snackbarHostState)
+                }, modifier = Modifier.fillMaxSize()
                 ) { innerPadding ->
                     Greeting(
                         name = "Android",
@@ -117,9 +113,7 @@ fun Greeting(
 ) {
     val scope = rememberCoroutineScope()
     NavHost(
-        modifier = modifier,
-        navController = navController,
-        startDestination = HomeScreen
+        modifier = modifier, navController = navController, startDestination = HomeScreen
     ) {
 
         composable<HomeScreen> {
@@ -130,8 +124,7 @@ fun Greeting(
                 navController.navigate(SelectPlayers)
             }, loadGame = {
                 navController.navigate(LoadGames)
-            }
-            )
+            })
         }
 
         composable<PlayerList> {
@@ -148,45 +141,20 @@ fun Greeting(
 
         composable<AddOrEditPlayer> {
             val playerId = it.toRoute<AddOrEditPlayer>().playerId
-            val context = LocalContext.current
             if (playerId > 0) {
                 title("Edit Player")
             } else {
                 title("Add New Player")
             }
-            PlayerProfileScreen(playerId, onSaveClicked = { playerName, playerPassword ->
+            PlayerProfileScreen(playerId, onSaveClicked = {
                 scope.launch {
-                    withContext(Dispatchers.IO) {
-                        playerId?.let {
-                            DataBaseHelper.getInstance(context).playerDao()
-                                .let { playerDao: PlayerDao ->
-                                    playerDao.getPlayer(playerId)?.let { player ->
-                                        player.name = playerName
-                                        player.pin = playerPassword
-                                        playerDao.updatePlayer(player)
-                                    }
-                                }
-
-                        } ?: run {
-                            DataBaseHelper.getInstance(context).playerDao()
-                                .addPlayer(Player(name = playerName, pin = playerPassword))
-                        }
-                    }
                     navController.popBackStack()
-                    snackbarHostState.showSnackbar("Saved $playerName with password $playerPassword")
                 }
             }, onCancel = {
                 navController.popBackStack()
-            },
-                onDelete = { playerId ->
-                    scope.launch {
-                        withContext(Dispatchers.IO) {
-                            DataBaseHelper.getInstance(context).playerDao()
-                                .deletePlayer(Player(playerId.toInt(), "", 0))
-                        }
-                    }
-                    navController.popBackStack()
-                })
+            }, onDelete = {
+                navController.popBackStack()
+            })
         }
 
         dialog<EnterPinDialog> {
@@ -210,9 +178,6 @@ fun Greeting(
             ValidatePin(playerId = enterPinDialog.playerId) { valid ->
                 navController.popBackStack()
                 if (valid) {
-//                    navController.navigate(
-//                        AddOrEditPlayer(playerId = enterPinDialog.playerId)
-//                    )
                     navController.navigate(CharacterScreen(enterPinDialog.characterId))
                 } else {
                     scope.launch {
@@ -224,11 +189,11 @@ fun Greeting(
 
         composable<SelectPlayers> {
             title("Select Players")
-            SelectPlayers(modifier, mutableListOf<Int>(), onPlayersSelected = {gameId ->
+            SelectPlayers(modifier, mutableListOf<Int>(), onPlayersSelected = { gameId ->
                 navController.popBackStack()
                 navController.navigate(GameLeaderBoard(gameId = gameId))
                 //Navigate to Leaderboard screen with start Game Button
-            }, onMessage =  {
+            }, onMessage = {
                 scope.launch {
                     snackbarHostState.showSnackbar(it)
                 }
@@ -237,44 +202,50 @@ fun Greeting(
 
         composable<GameLeaderBoard> {
             title("Score Board")
-            val gameLeaderBoard : GameLeaderBoard = it.toRoute()
+            val gameLeaderBoard: GameLeaderBoard = it.toRoute()
             GameLeaderBoardScreen(modifier, gameId = gameLeaderBoard.gameId) {
                 navController.popBackStack()
                 navController.navigate(GameScreen(gameLeaderBoard.gameId))
             }
         }
-        
+
         composable<LoadGames> {
             title("Saved Games")
-            LoadGamesScreen(modifier = modifier) {gameId ->
+            LoadGamesScreen(modifier = modifier) { gameId ->
                 navController.navigate(GameLeaderBoard(gameId))
             }
         }
 
         composable<GameScreen> {
             title("Game")
-            val reveal : GameScreen = it.toRoute()
-            ShowGameScreen(modifier = modifier, gameId = reveal.gameId, onPlayerClicked =
-            { playerId, characterId ->
-              navController.navigate(EnterPinDialogForReveal(playerId, characterId))
-            }, onRoundFinished = {success ->
-                navController.popBackStack()
-                navController.navigate(GameLeaderBoard(reveal.gameId))
-                navController.navigate(GuessResult(success = success))
-            })
+            val reveal: GameScreen = it.toRoute()
+            ShowGameScreen(modifier = modifier,
+                gameId = reveal.gameId,
+                onPlayerClicked = { playerId, characterId ->
+                    navController.navigate(EnterPinDialogForReveal(playerId, characterId))
+                },
+                onRoundResult = { success ->
+                    navController.navigate(GuessResult(success = success))
+                },
+                showLeaderBoard = {
+                    navController.popBackStack()
+                    navController.navigate(GameLeaderBoard(reveal.gameId))
+                })
         }
 
         composable<CharacterScreen> {
             title("Your Character")
-            val character : CharacterScreen = it.toRoute()
+            val character: CharacterScreen = it.toRoute()
             ShowCharacterToPlayer(modifier, character.characterId) {
                 navController.popBackStack()
             }
         }
 
         dialog<GuessResult> {
-            val guessResult : GuessResult = it.toRoute()
-            GuessResultDialog(modifier = modifier, success = guessResult.success)
+            val guessResult: GuessResult = it.toRoute()
+            GuessResultDialog(modifier = modifier, success = guessResult.success, dismissDialog = {
+                navController.popBackStack()
+            })
         }
     }
 }

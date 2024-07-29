@@ -66,11 +66,11 @@ dependencies {
     implementation(libs.kotlinx.serialization.json)
     implementation(libs.androidx.constraintlayout.compose)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
-    implementation("io.coil-kt:coil-compose:2.7.0")
-    implementation("io.coil-kt:coil-gif:2.7.0")
-    implementation("com.google.accompanist:accompanist-drawablepainter:0.35.0-alpha")
-    implementation("com.google.dagger:hilt-android:2.44")
-    kapt("com.google.dagger:hilt-android-compiler:2.44")
+    implementation(libs.coil.compose)
+    implementation(libs.coil.gif)
+    implementation(libs.accompanist.drawablepainter)
+    implementation(libs.hilt.android)
+    kapt(libs.hilt.android.compiler)
 
 
     implementation(libs.androidx.room.runtime)

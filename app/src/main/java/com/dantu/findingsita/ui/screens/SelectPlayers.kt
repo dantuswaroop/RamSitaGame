@@ -62,7 +62,7 @@ fun SelectPlayers(
         LaunchedEffect(key1 = scope) {
             launch {
                 withContext(Dispatchers.IO) {
-                    selectPlayersViewModel.getPlayers(context)
+                    selectPlayersViewModel.getPlayers()
                     selectPlayersViewModel.allPlayers.collect {
                         allPlayers = it
                     }
@@ -75,7 +75,7 @@ fun SelectPlayers(
             if(selectedPlayers.size > 2) {
                 //correct
                 scope.launch(Dispatchers.IO) {
-                    val gameId = selectPlayersViewModel.createGameWithPlayers(context)
+                    val gameId = selectPlayersViewModel.createGameWithPlayers()
                     withContext(Dispatchers.Main) {
                         onPlayersSelected(gameId)
                     }

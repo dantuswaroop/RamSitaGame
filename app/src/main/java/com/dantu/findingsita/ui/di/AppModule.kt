@@ -3,10 +3,14 @@ package com.dantu.findingsita.ui.di
 import android.content.Context
 import com.dantu.findingsita.data.DataBaseHelper
 import com.dantu.findingsita.data.GameDataBase
+import com.dantu.findingsita.data.repositories.GameRepository
+import com.dantu.findingsita.data.repositories.GameRepositoryDefault
 import com.dantu.findingsita.data.repositories.PlayerRepository
 import com.dantu.findingsita.data.repositories.PlayerRepositoryDefault
-import com.dantu.findingsita.domain.GetAllPlayersUseCase
-import com.dantu.findingsita.domain.GetAllPlayersUseCaseDefault
+import com.dantu.findingsita.domain.usecase.CreateGameUseCase
+import com.dantu.findingsita.domain.usecase.CreateGameUseCaseDefault
+import com.dantu.findingsita.domain.usecase.GetAllPlayersUseCase
+import com.dantu.findingsita.domain.usecase.GetAllPlayersUseCaseDefault
 import com.dantu.findingsita.domain.usecase.CreateOrUpdatePlayerUseCase
 import com.dantu.findingsita.domain.usecase.CreateOrUpdatePlayerUseCaseDefault
 import com.dantu.findingsita.domain.usecase.DeletePlayerUseCase
@@ -52,5 +56,14 @@ class AppModule {
     @Singleton
     fun provideGetPlayerUseCase(playerRepository: PlayerRepository): GetPlayerUseCase =
         GetPlayerUseCaseDefault(playerRepository)
+
+    @Provides
+    @Singleton
+    fun provideCreateGameUseCase(gameRepository: GameRepository) : CreateGameUseCase = CreateGameUseCaseDefault(gameRepository)
+
+    @Provides
+    @Singleton
+    fun provideGameRepository(gameDataBase: GameDataBase): GameRepository =
+        GameRepositoryDefault(gameDataBase)
 
 }

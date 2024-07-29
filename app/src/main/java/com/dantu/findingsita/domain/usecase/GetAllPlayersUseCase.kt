@@ -1,4 +1,4 @@
-package com.dantu.findingsita.domain
+package com.dantu.findingsita.domain.usecase
 
 import com.dantu.findingsita.data.entities.Player
 

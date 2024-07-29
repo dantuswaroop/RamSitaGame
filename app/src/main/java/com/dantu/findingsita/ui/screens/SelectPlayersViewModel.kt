@@ -1,29 +1,35 @@
 package com.dantu.findingsita.ui.screens
 
-import android.content.Context
 import androidx.lifecycle.ViewModel
-import com.dantu.findingsita.data.DataBaseHelper
-import com.dantu.findingsita.data.GameDataBase
+import androidx.lifecycle.viewModelScope
 import com.dantu.findingsita.data.entities.Game
 import com.dantu.findingsita.data.entities.GameStatus
 import com.dantu.findingsita.data.entities.Player
+import com.dantu.findingsita.domain.usecase.CreateGameUseCase
+import com.dantu.findingsita.domain.usecase.GetAllPlayersUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import java.util.Date
 import java.util.UUID
 import javax.inject.Inject
 
 @HiltViewModel
-class SelectPlayersViewModel @Inject constructor(private val gameDataBase: GameDataBase) : ViewModel() {
+class SelectPlayersViewModel @Inject constructor(private val getAllPlayersUseCase: GetAllPlayersUseCase,
+                                                 private val createGameUseCase : CreateGameUseCase
+) : ViewModel() {
     private val _allPlayers = MutableStateFlow(mutableListOf<Player>())
     val allPlayers: StateFlow<MutableList<Player>> = _allPlayers
 
+    private val _gameId = MutableSharedFlow<String>()
+    val gameId : SharedFlow<String> = _gameId
+
     suspend fun getPlayers() {
-        _allPlayers.value =
-            gameDataBase.playerDao().getAllPlayers().first()
-                .toMutableList()
+        _allPlayers.value = getAllPlayersUseCase().toMutableList()
     }
 
     suspend fun toggleSelection(index: Int) {
@@ -35,14 +41,9 @@ class SelectPlayersViewModel @Inject constructor(private val gameDataBase: GameD
         _allPlayers.emit(newList)
     }
 
-    fun createGameWithPlayers(): String {
-        val game = Game(UUID.randomUUID().toString(), null, Date().toString())
-        gameDataBase.gameDao().createGame(game)
-        with(gameDataBase.gameStatusDao()) {
-            _allPlayers.value.filter { it.selected }.forEach { player ->
-                insertPlayerRecord(GameStatus(gameId = game.id, player = player, score = 0))
-            }
+    fun createGameWithPlayers() {
+        viewModelScope.launch(Dispatchers.IO) {
+            _gameId.emit(createGameUseCase.invoke(_allPlayers.value.filter { it.selected }))
         }
-        return game.id
     }
 }

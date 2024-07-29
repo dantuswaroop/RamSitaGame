@@ -75,9 +75,11 @@ fun SelectPlayers(
             if(selectedPlayers.size > 2) {
                 //correct
                 scope.launch(Dispatchers.IO) {
-                    val gameId = selectPlayersViewModel.createGameWithPlayers()
-                    withContext(Dispatchers.Main) {
-                        onPlayersSelected(gameId)
+                    selectPlayersViewModel.createGameWithPlayers()
+                    selectPlayersViewModel.gameId.collect {
+                        withContext(Dispatchers.Main) {
+                            onPlayersSelected(it)
+                        }
                     }
                 }
             } else {

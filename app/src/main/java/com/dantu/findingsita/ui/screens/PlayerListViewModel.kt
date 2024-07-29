@@ -1,10 +1,9 @@
 package com.dantu.findingsita.ui.screens
 
-import android.view.View
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.dantu.findingsita.data.entities.Player
-import com.dantu.findingsita.domain.GetAllPlayersUseCase
+import com.dantu.findingsita.domain.usecase.GetAllPlayersUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow

@@ -23,16 +23,12 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.dialog
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
-import com.dantu.findingsita.data.DataBaseHelper
-import com.dantu.findingsita.data.dao.PlayerDao
-import com.dantu.findingsita.data.entities.Player
 import com.dantu.findingsita.ui.screens.AddOrEditPlayer
 import com.dantu.findingsita.ui.screens.CharacterScreen
 import com.dantu.findingsita.ui.screens.EnterPinDialog

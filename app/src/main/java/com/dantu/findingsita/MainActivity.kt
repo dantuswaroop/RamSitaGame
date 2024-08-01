@@ -226,6 +226,11 @@ fun Greeting(
                 showLeaderBoard = {
                     navController.popBackStack()
                     navController.navigate(GameLeaderBoard(reveal.gameId))
+                },
+                onMessage = {
+                    scope.launch {
+                        snackbarHostState.showSnackbar(it)
+                    }
                 })
         }
 

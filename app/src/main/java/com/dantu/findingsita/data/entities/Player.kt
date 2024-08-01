@@ -13,5 +13,6 @@ data class Player @JvmOverloads constructor(
     var wins : Int = 0,
     var profilePic : String? = null,
     @Ignore var selected : Boolean = false,
-    @Ignore var character: Character? = null
+    @Ignore var character: Character? = null,
+    @Ignore var revealed : Boolean = false
 )

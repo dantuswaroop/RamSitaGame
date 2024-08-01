@@ -1,10 +1,12 @@
 package com.dantu.findingsita.ui.screens
 
+import android.media.MediaPlayer
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -48,6 +50,32 @@ private enum class ScreenState {
     RESULT
 }
 
+@Composable
+fun Timer(numberSeconds : Int, modifier: Modifier, timedOut : () -> Unit) {
+    var rememberTimer :Int by remember {
+        mutableStateOf(numberSeconds)
+    }
+    val scope = rememberCoroutineScope()
+    val context = LocalContext.current
+    LaunchedEffect(key1 = scope) {
+        while (rememberTimer > 0) {
+            delay(1_000)
+            rememberTimer -= 1
+            if (rememberTimer == 3) {
+                MediaPlayer.create(context, R.raw.timeout).start()
+            }
+            if (rememberTimer == 0) {
+                timedOut()
+            }
+        }
+    }
+
+    Row(modifier = modifier.fillMaxWidth()) {
+        Text(text = "Seconds Left :: $rememberTimer", fontSize = 24.sp, fontWeight = FontWeight.ExtraBold)
+    }
+
+}
+
 
 @Composable
 fun ShowGameScreen(
@@ -55,7 +83,8 @@ fun ShowGameScreen(
     gameId: String,
     onPlayerClicked: (playerId: Int, characterId: Int) -> Unit,
     onRoundResult : (Boolean) -> Unit,
-    showLeaderBoard : () -> Unit
+    showLeaderBoard : () -> Unit,
+    onMessage : (String) -> Unit
 ) {
     val viewModel: RevealCharacterViewModel = viewModel()
     val scope = rememberCoroutineScope()
@@ -69,6 +98,7 @@ fun ShowGameScreen(
         mutableStateOf(ScreenState.REVEALING)
     }
 
+
     ConstraintLayout(modifier.fillMaxSize()) {
 
         LaunchedEffect(key1 = scope) {
@@ -77,9 +107,14 @@ fun ShowGameScreen(
             }
         }
         val (startGame, playersGrid) = createRefs()
+        val timer =createRef()
         if (finding == ScreenState.REVEALING) {
             Button(onClick = {
-                finding = ScreenState.FINDING
+                if (players.filter { !it.revealed }.isEmpty()) {
+                    finding = ScreenState.FINDING
+                } else {
+                    onMessage("Make sure that all the players have seen their chits")
+                }
             },
                 modifier = Modifier
                     .fillMaxWidth(0.8f)
@@ -89,6 +124,25 @@ fun ShowGameScreen(
                         absoluteRight.linkTo(parent.absoluteRight)
                     }) {
                 Text(text = "Start Finding")
+            }
+        } else if (finding == ScreenState.FINDING) {
+            Timer(numberSeconds = 30, modifier.constrainAs(timer) {
+                bottom.linkTo(parent.bottom, margin = 20.dp)
+                absoluteLeft.linkTo(parent.absoluteLeft)
+                absoluteRight.linkTo(parent.absoluteRight)
+            }) {
+                scope.launch(Dispatchers.IO) {
+                    viewModel.validateResult(
+                        context,
+                        players.filter { it.character?.type == CharacterType.FIND }[0].playerId
+                    )
+                    withContext(Dispatchers.Main) {
+                        onRoundResult(false)
+                        finding = ScreenState.RESULT
+                        delay(5_000)
+                        showLeaderBoard()
+                    }
+                }
             }
         }
 
@@ -123,6 +177,7 @@ fun ShowGameScreen(
                             } else if (finding == ScreenState.REVEALING) {
                                 //verifywith pin
                                 onPlayerClicked(it.playerId, it.character?.characterId ?: 0)
+                                it.revealed = true
                             } else if (finding == ScreenState.RESULT) {
                                 showLeaderBoard()
                             }

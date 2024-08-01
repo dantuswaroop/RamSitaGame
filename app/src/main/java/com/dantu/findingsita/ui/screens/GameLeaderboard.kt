@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -29,6 +30,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
@@ -79,14 +81,14 @@ fun GameLeaderBoardScreen(modifier: Modifier = Modifier, gameId : String, onRead
             .fillMaxSize()
             .constrainAs(leaderBoardLazyColumn) {
                 top.linkTo(parent.top, margin = 20.dp)
-                bottom.linkTo(startRoundButton.top, margin = 40.dp)
+                bottom.linkTo(startRoundButton.top, margin = 80.dp)
                 absoluteLeft.linkTo(parent.absoluteLeft)
                 absoluteRight.linkTo(parent.absoluteRight)
             }) {
             items(gameStatuses) {
                 Row(modifier = Modifier
                     .fillMaxWidth()
-                    .height(80.dp)
+                    .height(70.dp)
                     .background(colors[Math.abs(it.player.name.hashCode()) % colors.size]),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically) {
@@ -99,11 +101,11 @@ fun GameLeaderBoardScreen(modifier: Modifier = Modifier, gameId : String, onRead
                         Image(painter = painter, contentDescription = null,
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
-                                .size(60.dp)
-                                .clip(CircleShape))
+                                .fillMaxHeight(0.95f)
+                                .width(70.dp))
                         Spacer(modifier = Modifier.width(2.dp))
                         Text(text = "${it.player.name}", modifier = Modifier.padding(horizontal = 20.dp),
-                            fontSize = 16.sp)
+                            fontSize = 16.sp, fontWeight = FontWeight.Bold)
                     }
                     Text(text = "${it.score}", modifier = Modifier.padding(horizontal = 20.dp))
                 }

@@ -1,5 +1,6 @@
 package com.dantu.findingsita.ui.screens
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
@@ -8,8 +9,11 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,10 +25,16 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import androidx.lifecycle.viewmodel.compose.viewModel
+import coil.compose.rememberAsyncImagePainter
+import com.dantu.findingsita.R
 import com.dantu.findingsita.data.entities.GameStatus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -76,11 +86,25 @@ fun GameLeaderBoardScreen(modifier: Modifier = Modifier, gameId : String, onRead
             items(gameStatuses) {
                 Row(modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp)
+                    .height(80.dp)
                     .background(colors[Math.abs(it.player.name.hashCode()) % colors.size]),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = "${it.player.name}", modifier = Modifier.padding(horizontal = 20.dp))
+                    val painter = if(it.player.profilePic != null) {
+                        rememberAsyncImagePainter(model = it.player.profilePic)
+                    } else {
+                        painterResource(id = R.drawable.profile_place_holder)
+                    }
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Image(painter = painter, contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .size(60.dp)
+                                .clip(CircleShape))
+                        Spacer(modifier = Modifier.width(2.dp))
+                        Text(text = "${it.player.name}", modifier = Modifier.padding(horizontal = 20.dp),
+                            fontSize = 16.sp)
+                    }
                     Text(text = "${it.score}", modifier = Modifier.padding(horizontal = 20.dp))
                 }
                 Spacer(modifier = Modifier

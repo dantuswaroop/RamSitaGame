@@ -9,7 +9,6 @@ import com.dantu.findingsita.domain.usecase.GetPlayerUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableSharedFlow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
@@ -24,9 +23,9 @@ class PlayerProfileViewModel @Inject constructor(private val createOrUpdatePlaye
     val playerData : SharedFlow<Player?> = _playerData
 
 
-    fun createOrUpdatePlayer(id : Int?, name : String, pin : Int) {
+    fun createOrUpdatePlayer(id: Int, name: String, pin: Int, profilePictureUri: String?) {
         viewModelScope.launch(Dispatchers.IO) {
-            createOrUpdatePlayerUseCase(id, name, pin)
+            createOrUpdatePlayerUseCase.invoke(id, name, pin, profilePictureUri)
         }
     }
 

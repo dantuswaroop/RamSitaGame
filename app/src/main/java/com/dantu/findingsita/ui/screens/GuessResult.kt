@@ -1,5 +1,6 @@
 package com.dantu.findingsita.ui.screens
 
+import android.media.MediaPlayer
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -14,6 +15,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import com.dantu.findingsita.R
@@ -27,6 +29,11 @@ data class GuessResult(val success: Boolean)
 @Composable
 fun GuessResultDialog(modifier: Modifier, success: Boolean, dismissDialog : () -> Unit) {
     val scope = rememberCoroutineScope()
+    if(success) {
+        MediaPlayer.create(LocalContext.current, R.raw.win).start()
+    } else {
+        MediaPlayer.create(LocalContext.current, R.raw.wrong).start()
+    }
     Column(
         modifier
             .fillMaxWidth(0.7f)
@@ -43,7 +50,7 @@ fun GuessResultDialog(modifier: Modifier, success: Boolean, dismissDialog : () -
         Text(text = if (success) "Correct" else "Wrong")
         LaunchedEffect(key1 = scope) {
             launch {
-                delay(1_000)
+                delay(2_000)
                 dismissDialog()
             }
         }

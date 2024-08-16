@@ -1,6 +1,7 @@
 package com.dantu.findingsita.ui.screens
 
 import android.media.MediaPlayer
+import android.util.Log
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -16,7 +17,9 @@ import androidx.compose.foundation.lazy.grid.itemsIndexed
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -57,16 +60,21 @@ fun Timer(numberSeconds : Int, modifier: Modifier, timedOut : () -> Unit) {
     }
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
-    LaunchedEffect(key1 = scope) {
-        while (rememberTimer > 0) {
-            delay(1_000)
-            rememberTimer -= 1
-            if (rememberTimer == 3) {
-                MediaPlayer.create(context, R.raw.timeout).start()
+    DisposableEffect(key1 = true) {
+        val job = scope.launch {
+            while (rememberTimer > 0) {
+                delay(1_000)
+                rememberTimer -= 1
+                if (rememberTimer == 3) {
+                    MediaPlayer.create(context, R.raw.timeout).start()
+                }
+                if (rememberTimer == 0) {
+                    timedOut()
+                }
             }
-            if (rememberTimer == 0) {
-                timedOut()
-            }
+        }
+        onDispose {
+            job.cancel()
         }
     }
 
